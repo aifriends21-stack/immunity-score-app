@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>면역력 높이는 생활습관 점수</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===================================
+   CSS 변수 및 기본 설정
+=================================== */
+:root {
+  --good:      #2d7a4f;
+  --good-bg:   #eaf7f0;
+  --warn:      #b07d1a;
+  --warn-bg:   #fdf6e3;
+  --bad:       #c0392b;
+  --bad-bg:    #fdecea;
+
+  --ink:       #1a1a2e;
+  --paper:     #f8f5ef;
+  --muted:     #7a7a8a;
+  --border:    #ddd8cc;
+  --white:     #ffffff;
+
+  --sleep-c:   #3d5fa0;
+  --sleep-bg:  #edf2fa;
+  --diet-c:    #2d7a4f;
+  --diet-bg:   #eaf7f0;
+  --act-c:     #b56a10;
+  --act-bg:    #fdf0e0;
+  --stress-c:  #7a3d9a;
+  --stress-bg: #f5eefa;
+
+  --radius:    20px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--paper);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px 16px 40px;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(61,95,160,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 85% 80%, rgba(176,125,26,0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================================
+   카드 컨테이너
+=================================== */
+.card {
+  position: relative;
+  z-index: 1;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 520px;
+  padding: 44px 36px;
+  border: 1.5px solid var(--border);
+  margin-top: 20px;
+}
+
+/* ===================================
+   화면 전환
+=================================== */
+.screen { display: none; }
+.screen.active {
+  display: block;
+  animation: fadeUp 0.4s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================
+   타이포그래피
+=================================== */
+.app-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-top: 14px;
+  text-align: center;
+}
+.disclaimer {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 18px;
+  line-height: 1.65;
+  padding: 12px 16px;
+  background: #f5f3ef;
+  border-radius: 12px;
+}
+
+/* ===================================
+   버튼
+=================================== */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 20px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  margin-top: 12px;
+  letter-spacing: 0.3px;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(26,26,46,0.18);
+  margin-top: 28px;
+}
+.btn-primary:hover { background: #2c2c4a; box-shadow: 0 6px 24px rgba(26,26,46,0.24); }
+
+.btn-secondary {
+  background: #f0ede8;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+.btn-secondary:hover { background: #e5e1db; }
+
+/* ===================================
+   시작 화면
+=================================== */
+.start-icon {
+  font-size: 3.2rem;
+  display: block;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.domain-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+.domain-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.domain-chip.sleep  { background: var(--sleep-bg);  }
+.domain-chip.diet   { background: var(--diet-bg);   }
+.domain-chip.act    { background: var(--act-bg);    }
+.domain-chip.stress { background: var(--stress-bg); }
+.domain-chip .chip-icon { font-size: 1.3rem; }
+.domain-chip .chip-label { font-size: 0.95rem; }
+
+/* ===================================
+   질문 화면
+=================================== */
+.progress-bar {
+  height: 7px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.q-counter {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.domain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.domain-badge.sleep  { background: var(--sleep-bg);  color: var(--sleep-c);  }
+.domain-badge.diet   { background: var(--diet-bg);   color: var(--diet-c);   }
+.domain-badge.act    { background: var(--act-bg);    color: var(--act-c);    }
+.domain-badge.stress { background: var(--stress-bg); color: var(--stress-c); }
+
+.q-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.55;
+  margin-bottom: 28px;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 20px;
+  background: #f8f5ef;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+  transition: all 0.18s;
+  width: 100%;
+  line-height: 1.5;
+}
+.choice-btn:hover {
+  background: var(--white);
+  border-color: var(--ink);
+  transform: translateX(4px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+.choice-btn:active { transform: scale(0.98); }
+
+.choice-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.choice-btn:hover .choice-dot { border-color: var(--ink); background: var(--ink); }
+
+/* 5단계 색상 힌트 */
+.choice-btn[data-level="1"] { border-left: 4px solid #2d7a4f; }
+.choice-btn[data-level="2"] { border-left: 4px solid #5fad7a; }
+.choice-btn[data-level="3"] { border-left: 4px solid #b0a060; }
+.choice-btn[data-level="4"] { border-left: 4px solid #d07a30; }
+.choice-btn[data-level="5"] { border-left: 4px solid #c0392b; }
+
+/* 선택된 버튼 강조 상태 */
+.choice-btn.selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,26,46,0.20);
+  transform: none;
+}
+.choice-btn.selected .choice-dot {
+  border-color: #fff;
+  background: #fff;
+}
+.choice-btn.selected:hover {
+  background: #2c2c4a;
+  border-color: #2c2c4a;
+  transform: none;
+}
+
+/* 클릭 피드백 애니메이션 */
+.choice-btn.clicking {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* 뒤로가기 영역 */
+.question-nav {
+  margin-top: 20px;
+}
+.btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.2px;
+}
+.btn-back:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: #f8f5ef;
+}
+.btn-back:active { transform: scale(0.97); }
+.btn-back .back-arrow { font-size: 1.1rem; }
+
+/* ===================================
+   결과 화면
+=================================== */
+
+/* 가장 부족한 영역 강조 행 */
+.weakest-domain-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bad-bg);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.weakest-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.weakest-label::after { content: ':'; }
+.weakest-name {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--bad);
+  letter-spacing: 0.3px;
+}
+
+.result-badge {
+  display: inline-block;
+  padding: 8px 22px;
+  border-radius: 99px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.theme-good  .result-badge { background: var(--good-bg); color: var(--good); }
+.theme-warn  .result-badge { background: var(--warn-bg); color: var(--warn); }
+.theme-bad   .result-badge { background: var(--bad-bg);  color: var(--bad);  }
+
+.result-score-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.result-score {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 4.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.theme-good .result-score { color: var(--good); }
+.theme-warn .result-score { color: var(--warn); }
+.theme-bad  .result-score { color: var(--bad);  }
+.result-score-unit {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.result-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.result-summary {
+  font-size: 1.05rem;
+  color: #444;
+  line-height: 1.75;
+  margin-bottom: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+/* 영역별 점수 */
+.domain-scores {
+  margin-bottom: 24px;
+}
+.domain-scores-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.domain-score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.domain-score-row.sleep  { background: var(--sleep-bg);  }
+.domain-score-row.diet   { background: var(--diet-bg);   }
+.domain-score-row.act    { background: var(--act-bg);    }
+.domain-score-row.stress { background: var(--stress-bg); }
+
+.dscore-icon { font-size: 1.4rem; flex-shrink: 0; }
+.dscore-info { flex: 1; }
+.dscore-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.dscore-bar-wrap {
+  height: 7px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.dscore-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(.4,0,.2,1);
+}
+.sleep  .dscore-bar { background: var(--sleep-c); }
+.diet   .dscore-bar { background: var(--diet-c);  }
+.act    .dscore-bar { background: var(--act-c);   }
+.stress .dscore-bar { background: var(--stress-c);}
+
+.dscore-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+.dscore-num {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+.dscore-status {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-top: 3px;
+  display: inline-block;
+}
+.status-good  { background: var(--good-bg); color: var(--good); }
+.status-warn  { background: var(--warn-bg); color: var(--warn); }
+.status-bad   { background: var(--bad-bg);  color: var(--bad);  }
+
+/* 맞춤 권고 */
+.advice-box {
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  border: 1.5px solid var(--border);
+  background: #fdfcf9;
+}
+.advice-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.advice-section {
+  margin-bottom: 14px;
+}
+.advice-section:last-child { margin-bottom: 0; }
+.advice-domain-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.advice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 1.05rem;
+  padding: 6px 0;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.advice-item::before {
+  content: '→';
+  font-weight: 700;
+  color: var(--good);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.result-message {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  text-align: center;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  line-height: 1.7;
+}
+.theme-good .result-message { background: var(--good-bg); color: var(--good); }
+.theme-warn .result-message { background: var(--warn-bg); color: var(--warn); }
+.theme-bad  .result-message { background: var(--bad-bg);  color: var(--bad);  }
+
+/* ===================================
+   기록 화면
+=================================== */
+.history-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.history-avg-box {
+  background: #f5f3ef;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.history-avg-box strong {
+  font-size: 1.3rem;
+  font-family: 'Noto Serif KR', serif;
+}
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: #f8f5ef;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+}
+.history-date {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+.history-domains {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.history-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.history-score {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+.score-good { color: var(--good); }
+.score-warn { color: var(--warn); }
+.score-bad  { color: var(--bad);  }
+.history-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+.label-good { background: var(--good-bg); color: var(--good); }
+.label-warn { background: var(--warn-bg); color: var(--warn); }
+.label-bad  { background: var(--bad-bg);  color: var(--bad);  }
+
+.empty-msg {
+  text-align: center;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 30px 0;
+}
+.divider {
+  border: none;
+  border-top: 1.5px solid var(--border);
+  margin: 20px 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ===== 시작 화면 ===== -->
+  <div id="screen-start" class="screen active">
+    <span class="start-icon">🌿</span>
+    <h1 class="app-title">면역력 높이는<br>생활습관 점수</h1>
+    <p class="subtitle">총 20가지 질문으로 내 생활습관을<br>정밀하게 분석해 드립니다</p>
+
+    <div class="domain-overview">
+      <div class="domain-chip sleep">
+        <span class="chip-icon">🌙</span>
+        <div>
+          <div class="chip-label" style="font-size:0.8rem;color:var(--muted);">1~5번</div>
+          <div class="chip-label">수면</div>
+        </div>
+      </div>
+      <div class="domain-chip diet">
+        <span class="chip-icon">🥦</span>
+        <div>
+          <div class="chip-label" style="font-size:0.8rem;color:var(--muted);">6~10번</div>
+          <div class="chip-label">식단</div>
+        </div>
+      </div>
+      <div class="domain-chip act">
+        <span class="chip-icon">🏃</span>
+        <div>
+          <div class="chip-label" style="font-size:0.8rem;color:var(--muted);">11~15번</div>
+          <div class="chip-label">활동</div>
+        </div>
+      </div>
+      <div class="domain-chip stress">
+        <span class="chip-icon">🧘</span>
+        <div>
+          <div class="chip-label" style="font-size:0.8rem;color:var(--muted);">16~20번</div>
+          <div class="chip-label">스트레스</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="disclaimer">⚠️ 이 앱은 의학적 진단 도구가 아닙니다.<br>생활습관 참고용으로만 활용하세요.</p>
+    <button class="btn btn-primary" onclick="showQuestionScreen()">점수 측정 시작하기 →</button>
+    <button class="btn btn-secondary" onclick="showHistoryScreen()">📋 이전 기록 보기</button>
+  </div>
+
+  <!-- ===== 질문 화면 ===== -->
+  <div id="screen-question" class="screen">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-info">
+      <span class="q-counter" id="q-counter"></span>
+      <span class="domain-badge" id="domain-badge"></span>
+    </div>
+    <p class="q-text" id="q-text"></p>
+    <div class="choice-list" id="choice-list"></div>
+    <!-- 뒤로가기 버튼: 첫 질문에서는 숨김 -->
+    <div class="question-nav">
+      <button class="btn-back" id="btn-back" onclick="goBack()">
+        <span class="back-arrow">←</span> 이전 질문으로 돌아가기
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 결과 화면 ===== -->
+  <div id="screen-result" class="screen">
+    <span class="result-badge" id="result-badge"></span>
+    <div class="result-score-wrap">
+      <span class="result-score" id="result-score"></span>
+      <span class="result-score-unit">/ 100점</span>
+    </div>
+    <h2 class="result-title" id="result-title"></h2>
+    <!-- 가장 부족한 영역 한 줄 표시 (80점 미만일 때만 표시) -->
+    <div class="weakest-domain-row" id="weakest-domain-row" style="display:none;">
+      <span class="weakest-label">현재 가장 보완이 필요한 영역</span>
+      <span class="weakest-name" id="weakest-name"></span>
+    </div>
+    <p class="result-summary" id="result-summary"></p>
+
+    <!-- 영역별 점수 -->
+    <div class="domain-scores">
+      <p class="domain-scores-label">영역별 점수</p>
+      <div id="domain-scores-list"></div>
+    </div>
+
+    <!-- 맞춤 권고 -->
+    <div class="advice-box" id="advice-box">
+      <p class="advice-label">내 맞춤 권고사항</p>
+      <div id="advice-list"></div>
+    </div>
+
+    <p class="result-message" id="result-message"></p>
+    <p class="disclaimer" style="margin-top:18px;margin-bottom:0;">
+      점수 기준 안내 (전체): 양호 90~100 / 관리 필요 65~89 / 주의 필요 25~64<br>
+      점수 기준 안내 (영역): 양호 80~100 / 관리 필요 60~79 / 개선 필요 25~59
+    </p>
+    <button class="btn btn-primary"   onclick="showQuestionScreen()">다시 점검하기</button>
+    <button class="btn btn-secondary" onclick="showHistoryScreen()">📋 기록 보기</button>
+    <button class="btn btn-secondary" onclick="showStartScreen()">처음으로</button>
+  </div>
+
+  <!-- ===== 기록 화면 ===== -->
+  <div id="screen-history" class="screen">
+    <h2 class="history-title">📋 최근 기록</h2>
+    <div id="history-avg-box" class="history-avg-box"></div>
+    <div class="history-list" id="history-list"></div>
+    <hr class="divider">
+    <button class="btn btn-primary"   onclick="showStartScreen()">처음으로 돌아가기</button>
+    <button class="btn btn-secondary" onclick="clearHistory()">🗑 기록 삭제</button>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   1. 질문 데이터
+   domain: 'sleep' | 'diet' | 'act' | 'stress'
+   choices: 5단계 (점수: 20, 17, 14, 10, 5)
+===================================================================== */
+const QUESTIONS = [
+  /* ─── 수면 (1~5) ─── */
+  {
+    domain: 'sleep',
+    text: "최근 3일 평균 수면 시간은 어느 정도인가요?",
+    choices: [
+      { label: "7~9시간 충분히 잤다",              score: 20 },
+      { label: "6~7시간, 대체로 충분하다",         score: 17 },
+      { label: "5~6시간, 조금 부족하다",           score: 14 },
+      { label: "4~5시간, 많이 부족하다",           score: 10 },
+      { label: "4시간 이하, 거의 못 잤다",         score:  5 }
+    ]
+  },
+  {
+    domain: 'sleep',
+    text: "잠들기까지 시간이 얼마나 걸리나요?",
+    choices: [
+      { label: "10분 이내로 금방 잠든다",          score: 20 },
+      { label: "10~20분 정도 걸린다",              score: 17 },
+      { label: "20~30분 정도 걸린다",              score: 14 },
+      { label: "30분~1시간 걸린다",               score: 10 },
+      { label: "1시간 이상 뒤척인다",              score:  5 }
+    ]
+  },
+  {
+    domain: 'sleep',
+    text: "밤에 자주 깨는 편인가요?",
+    choices: [
+      { label: "전혀 깨지 않고 푹 잔다",           score: 20 },
+      { label: "거의 깨지 않는다",                 score: 17 },
+      { label: "1~2번 정도 깬다",                  score: 14 },
+      { label: "3번 이상 자주 깬다",               score: 10 },
+      { label: "자주 깨서 수면이 많이 끊긴다",     score:  5 }
+    ]
+  },
+  {
+    domain: 'sleep',
+    text: "아침에 일어났을 때 몸 상태는 어떤가요?",
+    choices: [
+      { label: "매우 개운하고 상쾌하다",            score: 20 },
+      { label: "비교적 개운한 편이다",              score: 17 },
+      { label: "보통이다",                          score: 14 },
+      { label: "약간 무겁고 피곤하다",              score: 10 },
+      { label: "매우 피곤하고 일어나기 힘들다",     score:  5 }
+    ]
+  },
+  {
+    domain: 'sleep',
+    text: "낮 동안 졸림이나 피로감이 있나요?",
+    choices: [
+      { label: "전혀 없고 활기차다",               score: 20 },
+      { label: "거의 없는 편이다",                 score: 17 },
+      { label: "가끔 졸리거나 피곤하다",           score: 14 },
+      { label: "자주 졸리고 피곤하다",             score: 10 },
+      { label: "항상 졸리고 집중이 어렵다",        score:  5 }
+    ]
+  },
+
+  /* ─── 식단 (6~10) ─── */
+  {
+    domain: 'diet',
+    text: "하루 채소 섭취량은 어느 정도인가요?",
+    choices: [
+      { label: "매 끼니 다양한 채소를 충분히 먹는다",   score: 20 },
+      { label: "대부분의 식사에 채소를 포함한다",       score: 17 },
+      { label: "하루 1~2회 정도 먹는다",               score: 14 },
+      { label: "가끔 먹거나 부족한 편이다",             score: 10 },
+      { label: "거의 먹지 않는다",                     score:  5 }
+    ]
+  },
+  {
+    domain: 'diet',
+    text: "고기·생선·계란·두부 등 단백질 섭취는 충분한가요?",
+    choices: [
+      { label: "매 끼니 단백질 식품을 충분히 먹는다",  score: 20 },
+      { label: "하루 2회 이상 섭취한다",               score: 17 },
+      { label: "하루 1회 정도 섭취한다",               score: 14 },
+      { label: "2~3일에 한 번 정도로 부족하다",        score: 10 },
+      { label: "거의 섭취하지 않는다",                 score:  5 }
+    ]
+  },
+  {
+    domain: 'diet',
+    text: "하루 물(음료 제외) 섭취량은 충분한가요?",
+    choices: [
+      { label: "1.5~2L 이상 충분히 마신다",           score: 20 },
+      { label: "1~1.5L 정도 마신다",                  score: 17 },
+      { label: "500ml~1L 정도 마신다",                score: 14 },
+      { label: "물 마시는 것을 자주 잊는다",           score: 10 },
+      { label: "거의 마시지 않는다",                   score:  5 }
+    ]
+  },
+  {
+    domain: 'diet',
+    text: "라면·과자·패스트푸드 등 가공식품 섭취 빈도는?",
+    choices: [
+      { label: "거의 먹지 않는다 (주 1회 미만)",      score: 20 },
+      { label: "주 1~2회 정도 먹는다",                score: 17 },
+      { label: "주 3~4회 정도 먹는다",                score: 14 },
+      { label: "거의 매일 먹는다",                    score: 10 },
+      { label: "하루 2회 이상 자주 먹는다",           score:  5 }
+    ]
+  },
+  {
+    domain: 'diet',
+    text: "아침·점심·저녁 식사 시간이 규칙적인가요?",
+    choices: [
+      { label: "매일 거의 같은 시간에 3끼 먹는다",   score: 20 },
+      { label: "대체로 규칙적인 편이다",              score: 17 },
+      { label: "조금 불규칙하다",                     score: 14 },
+      { label: "많이 불규칙하다",                     score: 10 },
+      { label: "식사를 자주 거르거나 매우 불규칙하다",score:  5 }
+    ]
+  },
+
+  /* ─── 활동 (11~15) ─── */
+  {
+    domain: 'act',
+    text: "하루 평균 활동량(걷기 포함)은 어느 정도인가요?",
+    choices: [
+      { label: "1만 보 이상 충분히 움직인다",         score: 20 },
+      { label: "7,000~9,999보 정도 움직인다",         score: 17 },
+      { label: "5,000~6,999보 정도 움직인다",         score: 14 },
+      { label: "3,000~4,999보로 적은 편이다",         score: 10 },
+      { label: "3,000보 이하로 거의 움직이지 않는다", score:  5 }
+    ]
+  },
+  {
+    domain: 'act',
+    text: "이번 주 운동(걷기·스트레칭 포함) 빈도는?",
+    choices: [
+      { label: "주 5회 이상 규칙적으로 운동한다",     score: 20 },
+      { label: "주 3~4회 운동한다",                   score: 17 },
+      { label: "주 1~2회 운동한다",                   score: 14 },
+      { label: "이번 달에 1~2번 정도 했다",           score: 10 },
+      { label: "거의 운동하지 않는다",                score:  5 }
+    ]
+  },
+  {
+    domain: 'act',
+    text: "하루 앉아있는 시간은 얼마나 되나요?",
+    choices: [
+      { label: "3시간 이하, 자주 일어나서 움직인다", score: 20 },
+      { label: "3~5시간 정도 앉아 있는다",           score: 17 },
+      { label: "5~7시간 정도 앉아 있는다",           score: 14 },
+      { label: "7~9시간 대부분 앉아 있다",           score: 10 },
+      { label: "9시간 이상 거의 종일 앉아 있다",     score:  5 }
+    ]
+  },
+  {
+    domain: 'act',
+    text: "계단 이용, 짧은 산책 등 일상 속 활동은?",
+    choices: [
+      { label: "의식적으로 자주 움직이려 한다",       score: 20 },
+      { label: "어느 정도 일상 활동을 하는 편이다",   score: 17 },
+      { label: "보통이다",                             score: 14 },
+      { label: "편한 방법을 주로 선택한다",           score: 10 },
+      { label: "최소한의 움직임만 한다",              score:  5 }
+    ]
+  },
+  {
+    domain: 'act',
+    text: "예전에 비해 체력이나 활력이 떨어진 느낌이 있나요?",
+    choices: [
+      { label: "체력이 매우 좋고 활기차다",           score: 20 },
+      { label: "체력이 괜찮은 편이다",                score: 17 },
+      { label: "보통이다",                             score: 14 },
+      { label: "예전보다 체력이 다소 떨어졌다",       score: 10 },
+      { label: "체력이 많이 저하되어 힘들다",         score:  5 }
+    ]
+  },
+
+  /* ─── 스트레스/컨디션 (16~20) ─── */
+  {
+    domain: 'stress',
+    text: "최근 스트레스 수준은 어느 정도인가요?",
+    choices: [
+      { label: "거의 없고 마음이 매우 편하다",        score: 20 },
+      { label: "약간 있지만 잘 해소되는 편이다",      score: 17 },
+      { label: "보통 수준이다",                        score: 14 },
+      { label: "스트레스가 많고 해소가 잘 안 된다",   score: 10 },
+      { label: "매우 높아 일상생활에 지장이 있다",    score:  5 }
+    ]
+  },
+  {
+    domain: 'stress',
+    text: "요즘 기분이나 감정 상태는 어떤가요?",
+    choices: [
+      { label: "매우 긍정적이고 활기차다",            score: 20 },
+      { label: "대체로 좋은 편이다",                  score: 17 },
+      { label: "보통이다",                             score: 14 },
+      { label: "우울하거나 의욕 없는 날이 많다",      score: 10 },
+      { label: "기분이 매우 저조하고 무기력하다",     score:  5 }
+    ]
+  },
+  {
+    domain: 'stress',
+    text: "최근 1년간 감기나 잔병치레 빈도는?",
+    choices: [
+      { label: "1년에 거의 없다",                     score: 20 },
+      { label: "1년에 1~2번 정도",                    score: 17 },
+      { label: "1년에 3~4번 정도",                    score: 14 },
+      { label: "1년에 5번 이상 자주 걸린다",          score: 10 },
+      { label: "거의 매달 아프거나 현재도 몸이 약하다",score: 5 }
+    ]
+  },
+  {
+    domain: 'stress',
+    text: "평소 소화 상태는 어떤가요?",
+    choices: [
+      { label: "항상 소화가 잘 된다",                 score: 20 },
+      { label: "대체로 소화가 잘 되는 편이다",        score: 17 },
+      { label: "보통이다",                             score: 14 },
+      { label: "소화 불량이 자주 있다",               score: 10 },
+      { label: "소화 문제가 매우 심하다",              score:  5 }
+    ]
+  },
+  {
+    domain: 'stress',
+    text: "전반적인 몸 상태는 어떤가요?",
+    choices: [
+      { label: "매우 가볍고 활기차다",                score: 20 },
+      { label: "비교적 괜찮은 편이다",                score: 17 },
+      { label: "보통이다",                             score: 14 },
+      { label: "무겁고 피곤한 편이다",                score: 10 },
+      { label: "매우 무겁고 온몸이 힘들다",           score:  5 }
+    ]
+  }
+];
+
+/* =====================================================================
+   2. 영역 메타 정보
+===================================================================== */
+const DOMAIN_META = {
+  sleep:  { name: '수면',      icon: '🌙', cls: 'sleep',  badge: 'sleep'  },
+  diet:   { name: '식단',      icon: '🥦', cls: 'diet',   badge: 'diet'   },
+  act:    { name: '활동',      icon: '🏃', cls: 'act',    badge: 'act'    },
+  stress: { name: '스트레스',  icon: '🧘', cls: 'stress', badge: 'stress' }
+};
+const DOMAIN_ORDER = ['sleep', 'diet', 'act', 'stress'];
+
+/* =====================================================================
+   3. 영역별 맞춤 권고 데이터
+   severe: 25~59점 (개선 필요)
+   mild:   60~79점 (관리 필요)
+===================================================================== */
+const DOMAIN_ADVICE = {
+  sleep: {
+    severe: [
+      "수면 시간을 7시간 이상으로 늘리는 것을 최우선으로 해보세요",
+      "잠들기 1시간 전 스마트폰·TV 사용을 줄이고, 어두운 환경을 만드세요",
+      "매일 같은 시간에 자고 일어나는 규칙적인 수면 습관이 중요합니다"
+    ],
+    mild: [
+      "취침 전 15분 가벼운 스트레칭이 수면의 질을 높여줍니다",
+      "취침 3~4시간 전부터 카페인 음료를 피해보세요"
+    ]
+  },
+  diet: {
+    severe: [
+      "매 끼니 접시의 절반을 채소로 채우는 것을 목표로 해보세요",
+      "단백질 식품(계란, 두부, 닭가슴살)을 하루 2회 이상 챙겨 드세요",
+      "가공식품 대신 자연식품 위주로 바꾸는 것이 가장 효과적입니다"
+    ],
+    mild: [
+      "식사 시간을 좀 더 규칙적으로 유지해 보세요",
+      "하루 물 섭취량을 1.5L 이상으로 늘리는 것을 목표로 하세요"
+    ]
+  },
+  act: {
+    severe: [
+      "매일 20분 이상의 가벼운 산책부터 시작해 보세요",
+      "1시간마다 5분씩 일어나 움직이는 습관을 만들어 보세요",
+      "엘리베이터 대신 계단을 이용하는 것부터 시작해 보세요"
+    ],
+    mild: [
+      "주 3회 이상 운동 습관을 만들어 보세요",
+      "하루 걷기 목표(7,000보)를 설정하고 실천해 보세요"
+    ]
+  },
+  stress: {
+    severe: [
+      "매일 10분 이상 조용히 쉬거나 명상하는 시간을 만들어 보세요",
+      "스트레스 상황을 일기로 기록하면 원인 파악에 도움이 됩니다",
+      "신뢰하는 사람과 감정을 나누거나, 전문가 상담을 고려해 보세요"
+    ],
+    mild: [
+      "좋아하는 취미 활동을 정기적으로 즐겨보세요",
+      "복식호흡이나 가벼운 스트레칭으로 긴장을 풀어보세요"
+    ]
+  }
+};
+
+/* =====================================================================
+   4. 전체 결과 판정 기준
+===================================================================== */
+const OVERALL_RESULT = {
+  good: {
+    minScore: 90,
+    badge: '양호',
+    theme: 'theme-good',
+    title: '면역력 관리 상태가 좋습니다',
+    summary: '전반적인 생활습관이 잘 유지되고 있습니다.\n지금의 좋은 습관을 꾸준히 이어가세요.',
+    message: '"지금의 좋은 습관이 건강을 지키고 있습니다"'
+  },
+  warn: {
+    minScore: 65,
+    badge: '관리 필요',
+    theme: 'theme-warn',
+    title: '조금 더 관리가 필요합니다',
+    summary: '일부 생활습관을 조정하면 더 좋은 상태로 개선될 수 있습니다.\n아래 권고사항을 참고해 보세요.',
+    message: '"작은 변화가 건강의 큰 차이를 만듭니다"'
+  },
+  bad: {
+    minScore: 0,
+    badge: '주의 필요',
+    theme: 'theme-bad',
+    title: '생활습관 점검이 필요합니다',
+    summary: '여러 영역에서 개선이 필요한 상태입니다.\n오늘 한 가지부터 천천히 바꿔보세요.',
+    message: '"지금부터 시작하면, 분명히 달라질 수 있습니다"'
+  }
+};
+
+/* =====================================================================
+   5. 앱 상태 변수
+===================================================================== */
+let currentQuestion = 0;
+let answers         = [];   // answers[i] = { domain, score, choiceIdx } | null
+
+/* =====================================================================
+   6. 점수 계산
+===================================================================== */
+// answers 배열 → 영역별 점수 맵 계산 (on demand)
+function calcDomainScores() {
+  const map = { sleep: 0, diet: 0, act: 0, stress: 0 };
+  answers.forEach(a => {
+    if (a !== null && a !== undefined) {
+      map[a.domain] += a.score;
+    }
+  });
+  return map;
+}
+
+// 영역 점수 → 전체 점수 (4개 영역 평균)
+function calcTotalScore(domainMap) {
+  const sum = DOMAIN_ORDER.reduce((acc, d) => acc + domainMap[d], 0);
+  return Math.round(sum / 4);
+}
+
+/* =====================================================================
+   7. 영역 점수 판정
+===================================================================== */
+function getDomainStatus(score) {
+  if (score >= 80) return { key: 'good', label: '양호',    cls: 'status-good' };
+  if (score >= 60) return { key: 'warn', label: '관리 필요', cls: 'status-warn' };
+  return               { key: 'bad',  label: '개선 필요', cls: 'status-bad'  };
+}
+
+// 전체 점수 판정
+function getOverallKey(score) {
+  if (score >= OVERALL_RESULT.good.minScore) return 'good';
+  if (score >= OVERALL_RESULT.warn.minScore) return 'warn';
+  return 'bad';
+}
+
+/* =====================================================================
+   8. 맞춤 권고 생성 (낮은 영역만, 최대 2~3개)
+===================================================================== */
+function buildAdvice(domainScoreMap) {
+  // 점수 낮은 순으로 정렬, 80점 미만 영역만 대상
+  const targets = DOMAIN_ORDER
+    .filter(d => domainScoreMap[d] < 80)
+    .sort((a, b) => domainScoreMap[a] - domainScoreMap[b])
+    .slice(0, 3); // 최대 3개 영역
+
+  if (targets.length === 0) {
+    return '<p style="font-size:1.05rem;color:var(--good);font-weight:600;">✨ 모든 영역이 양호합니다! 지금의 습관을 유지하세요.</p>';
+  }
+
+  return targets.map(domain => {
+    const meta  = DOMAIN_META[domain];
+    const score = domainScoreMap[domain];
+    const tips  = score < 60
+      ? DOMAIN_ADVICE[domain].severe
+      : DOMAIN_ADVICE[domain].mild;
+
+    const items = tips.map(t => `<div class="advice-item">${t}</div>`).join('');
+
+    return `
+      <div class="advice-section">
+        <div class="advice-domain-title">
+          <span>${meta.icon}</span>
+          <span>${meta.name} 영역 (${score}점)</span>
+        </div>
+        ${items}
+      </div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   9. localStorage 저장 / 불러오기 / 삭제
+===================================================================== */
+const STORAGE_KEY = 'immunity_records_v3';
+
+function loadRecords() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch (e) { return []; }
+}
+
+function saveRecord(totalScore, domainScoreMap) {
+  const records = loadRecords();
+  const now     = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  records.unshift({
+    date:    dateStr,
+    score:   totalScore,
+    domains: { ...domainScoreMap }
+  });
+  if (records.length > 10) records.splice(10);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function clearHistory() {
+  if (confirm("기록을 모두 삭제할까요?")) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistoryList();
+  }
+}
+
+/* =====================================================================
+   10. 화면 전환
+===================================================================== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showStartScreen() { showScreen('screen-start'); }
+
+function showQuestionScreen() {
+  currentQuestion = 0;
+  answers         = new Array(QUESTIONS.length).fill(null);
+  renderQuestion();
+  showScreen('screen-question');
+}
+
+function showResultScreen() {
+  const domainMap = calcDomainScores();
+  const total     = calcTotalScore(domainMap);
+  saveRecord(total, domainMap);
+  renderResult(total, domainMap);
+  showScreen('screen-result');
+}
+
+function showHistoryScreen() {
+  renderHistoryList();
+  showScreen('screen-history');
+}
+
+/* =====================================================================
+   11. 질문 화면 렌더링
+===================================================================== */
+function renderQuestion() {
+  const q     = QUESTIONS[currentQuestion];
+  const total = QUESTIONS.length;
+  const pct   = ((currentQuestion + 1) / total) * 100;
+
+  // 진행 바
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  // 카운터
+  document.getElementById('q-counter').textContent =
+    `질문 ${currentQuestion + 1} / ${total}`;
+
+  // 영역 뱃지
+  const meta  = DOMAIN_META[q.domain];
+  const badge = document.getElementById('domain-badge');
+  badge.textContent = meta.icon + ' ' + meta.name;
+  badge.className   = `domain-badge ${meta.badge}`;
+
+  // 질문 텍스트
+  document.getElementById('q-text').textContent = q.text;
+
+  // 이전에 저장된 답변 인덱스 (뒤로 왔을 때 복원)
+  const savedAnswer = answers[currentQuestion];
+  const savedIdx    = savedAnswer ? savedAnswer.choiceIdx : -1;
+
+  // 선택지 버튼 생성
+  const list = document.getElementById('choice-list');
+  list.innerHTML = '';
+  q.choices.forEach((choice, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn' + (idx === savedIdx ? ' selected' : '');
+    btn.setAttribute('data-level', idx + 1);
+    btn.innerHTML = `<span class="choice-dot"></span>${choice.label}`;
+    btn.onclick   = () => handleAnswer(q.domain, choice.score, idx, btn);
+    list.appendChild(btn);
+  });
+
+  // 뒤로가기 버튼: 첫 질문에서는 숨김
+  const backBtn = document.getElementById('btn-back');
+  backBtn.style.display = currentQuestion === 0 ? 'none' : 'flex';
+}
+
+// 답변 선택: 저장 → 0.2초 피드백 → 다음 질문
+function handleAnswer(domain, score, choiceIdx, btnEl) {
+  // 이미 클릭 중이면 무시 (중복 클릭 방지)
+  if (btnEl.classList.contains('clicking')) return;
+
+  // 선택된 버튼 강조 표시
+  document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected', 'clicking');
+
+  // 현재 질문 답변 저장 (answers 배열)
+  answers[currentQuestion] = { domain, score, choiceIdx };
+
+  // 0.2초 피드백 후 다음 질문으로 이동
+  setTimeout(() => {
+    btnEl.classList.remove('clicking');
+    currentQuestion++;
+    if (currentQuestion < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      showResultScreen();
+    }
+  }, 200);
+}
+
+// 뒤로가기: 이전 질문으로 이동 (선택 상태 자동 복원)
+function goBack() {
+  if (currentQuestion <= 0) return;
+  currentQuestion--;
+  renderQuestion();
+}
+
+/* =====================================================================
+   12. 결과 화면 렌더링
+===================================================================== */
+/* =====================================================================
+   12-A. 동적 총평 생성
+   - 80점 미만 영역 이름을 추출해 자연스러운 문장으로 반환
+===================================================================== */
+function buildDynamicSummary(domainScoreMap) {
+  // 80점 미만 영역 이름 수집 (점수 낮은 순)
+  const weakDomains = DOMAIN_ORDER
+    .filter(d => domainScoreMap[d] < 80)
+    .sort((a, b) => domainScoreMap[a] - domainScoreMap[b])
+    .map(d => DOMAIN_META[d].name);
+
+  if (weakDomains.length === 0) {
+    return '전반적으로 매우 좋은 생활습관 상태입니다.\n지금의 좋은 습관을 꾸준히 이어가세요.';
+  }
+
+  // "A", "A와 B", "A, B와 C" 형식으로 결합
+  let domainText;
+  if (weakDomains.length === 1) {
+    domainText = weakDomains[0];
+  } else {
+    const last = weakDomains[weakDomains.length - 1];
+    const rest = weakDomains.slice(0, -1).join(', ');
+    domainText = `${rest}과 ${last}`;
+  }
+
+  return `${domainText} 영역을 보완하면 더 좋은 상태가 될 수 있습니다.\n아래 권고사항을 참고해 오늘부터 조금씩 실천해 보세요.`;
+}
+
+/* =====================================================================
+   12-B. 가장 부족한 영역 1개 반환
+===================================================================== */
+function getWeakestDomain(domainScoreMap) {
+  return DOMAIN_ORDER.reduce((minD, d) =>
+    domainScoreMap[d] < domainScoreMap[minD] ? d : minD
+  );
+}
+
+function renderResult(total, domainScoreMap) {
+  const key    = getOverallKey(total);
+  const result = OVERALL_RESULT[key];
+  const wrap   = document.getElementById('screen-result');
+
+  // 테마 색상
+  wrap.className = `screen active ${result.theme}`;
+
+  document.getElementById('result-badge').textContent   = result.badge;
+  document.getElementById('result-score').textContent   = total;
+  document.getElementById('result-title').textContent   = result.title;
+  // 동적 총평: 부족한 영역 이름 반영
+  document.getElementById('result-summary').textContent = buildDynamicSummary(domainScoreMap);
+  document.getElementById('result-message').textContent = result.message;
+
+  // 가장 부족한 영역 한 줄 표시 (모든 영역 80점 이상이면 숨김)
+  const weakestKey  = getWeakestDomain(domainScoreMap);
+  const weakestMeta = DOMAIN_META[weakestKey];
+  const weakestScore = domainScoreMap[weakestKey];
+  const weakestRow  = document.getElementById('weakest-domain-row');
+  if (weakestScore < 80) {
+    document.getElementById('weakest-name').textContent =
+      `${weakestMeta.icon} ${weakestMeta.name} (${weakestScore}점)`;
+    weakestRow.style.display = 'flex';
+  } else {
+    weakestRow.style.display = 'none';
+  }
+
+  // 영역별 점수 렌더링
+  const dList = document.getElementById('domain-scores-list');
+  dList.innerHTML = DOMAIN_ORDER.map(domain => {
+    const meta   = DOMAIN_META[domain];
+    const score  = domainScoreMap[domain];
+    const status = getDomainStatus(score);
+    return `
+      <div class="domain-score-row ${meta.cls}">
+        <span class="dscore-icon">${meta.icon}</span>
+        <div class="dscore-info">
+          <div class="dscore-name">${meta.name}</div>
+          <div class="dscore-bar-wrap">
+            <div class="dscore-bar" style="width:${score}%"></div>
+          </div>
+        </div>
+        <div class="dscore-right">
+          <div class="dscore-num">${score}</div>
+          <span class="dscore-status ${status.cls}">${status.label}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // 맞춤 권고 렌더링
+  document.getElementById('advice-list').innerHTML = buildAdvice(domainScoreMap);
+}
+
+/* =====================================================================
+   13. 기록 목록 렌더링
+===================================================================== */
+function renderHistoryList() {
+  const records = loadRecords();
+  const listEl  = document.getElementById('history-list');
+  const avgBox  = document.getElementById('history-avg-box');
+
+  if (records.length === 0) {
+    avgBox.innerHTML = '<span style="color:var(--muted)">아직 기록이 없습니다</span>';
+    listEl.innerHTML = '<p class="empty-msg">점수를 측정하면 여기에 기록됩니다</p>';
+    return;
+  }
+
+  // 평균 계산
+  const avg       = Math.round(records.reduce((a, r) => a + r.score, 0) / records.length);
+  const avgKey    = getOverallKey(avg);
+  const avgResult = OVERALL_RESULT[avgKey];
+  avgBox.innerHTML = `
+    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:4px;">최근 ${records.length}회 평균 점수</div>
+    <strong style="color:${avgKey === 'good' ? 'var(--good)' : avgKey === 'warn' ? 'var(--warn)' : 'var(--bad)'}">${avg}점</strong>
+    <span style="margin-left:8px;font-size:0.9rem;color:var(--muted);">${avgResult.badge}</span>`;
+
+  // 기록 목록
+  listEl.innerHTML = records.map(r => {
+    const rKey    = getOverallKey(r.score);
+    const rResult = OVERALL_RESULT[rKey];
+    const dInfo   = r.domains
+      ? DOMAIN_ORDER.map(d => {
+          const s  = r.domains[d];
+          const st = getDomainStatus(s);
+          return `${DOMAIN_META[d].icon}${s}`;
+        }).join(' · ')
+      : '';
+    return `
+      <div class="history-item">
+        <div>
+          <div class="history-date">${r.date}</div>
+          ${dInfo ? `<div class="history-domains">${dInfo}</div>` : ''}
+        </div>
+        <div class="history-score-wrap">
+          <span class="history-score score-${rKey}">${r.score}점</span>
+          <span class="history-label label-${rKey}">${rResult.badge}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
